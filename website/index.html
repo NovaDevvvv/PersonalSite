@@ -1,1 +1,339 @@
-<p>Test</p>
+<!doctype html>
+<html lang="en" data-bs-theme="dark">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Nova Blake • Portfolio</title>
+	<meta name="description" content="Portfolio front page for Nova Blake, showcasing projects, skills, and contact details.">
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+	<style>
+		:root {
+			--bg-radial-1: rgba(119, 77, 255, .35);
+			--bg-radial-2: rgba(0, 212, 255, .2);
+			--accent: #a78bfa;
+			--accent-2: #22d3ee;
+			--surface: rgba(255, 255, 255, .04);
+			--surface-border: rgba(255, 255, 255, .15);
+		}
+
+		body {
+			font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+			background:
+				radial-gradient(circle at 10% 10%, var(--bg-radial-1) 0, transparent 35%),
+				radial-gradient(circle at 90% 20%, var(--bg-radial-2) 0, transparent 40%),
+				#0b1020;
+			color: #e9edf5;
+		}
+
+		.navbar {
+			backdrop-filter: blur(12px);
+			background-color: rgba(10, 14, 30, .75) !important;
+			border-bottom: 1px solid rgba(255, 255, 255, .08);
+		}
+
+		.hero {
+			min-height: 92vh;
+			display: grid;
+			align-items: center;
+			position: relative;
+			overflow: hidden;
+		}
+
+		.hero::after {
+			content: "";
+			position: absolute;
+			width: 380px;
+			height: 380px;
+			right: -120px;
+			top: -120px;
+			background: radial-gradient(circle, rgba(167, 139, 250, .5) 0, transparent 65%);
+			pointer-events: none;
+		}
+
+		.glass-card {
+			background: var(--surface);
+			border: 1px solid var(--surface-border);
+			border-radius: 1rem;
+			backdrop-filter: blur(8px);
+			box-shadow: 0 18px 45px rgba(2, 6, 23, .35);
+		}
+
+		.highlight {
+			background: linear-gradient(120deg, var(--accent), var(--accent-2));
+			-webkit-background-clip: text;
+			background-clip: text;
+			color: transparent;
+		}
+
+		.chip {
+			border: 1px solid rgba(255, 255, 255, .18);
+			border-radius: 999px;
+			padding: .35rem .8rem;
+			font-size: .85rem;
+			color: #c9d7ee;
+			background: rgba(255, 255, 255, .03);
+		}
+
+		.metric-number {
+			font-size: 2rem;
+			font-weight: 800;
+			line-height: 1;
+		}
+
+		.section-title {
+			font-weight: 800;
+			letter-spacing: .02em;
+		}
+
+		.project-card img {
+			object-fit: cover;
+			height: 220px;
+		}
+
+		.skill-pill {
+			border-radius: 999px;
+			background: rgba(255, 255, 255, .06);
+			border: 1px solid rgba(255, 255, 255, .12);
+			padding: .5rem .9rem;
+			font-size: .9rem;
+			margin: .35rem;
+			display: inline-block;
+		}
+
+		.timeline {
+			border-left: 2px solid rgba(255, 255, 255, .18);
+			margin-left: .9rem;
+			padding-left: 1.35rem;
+		}
+
+		.timeline-item {
+			position: relative;
+			margin-bottom: 1.4rem;
+		}
+
+		.timeline-item::before {
+			content: "";
+			position: absolute;
+			width: .8rem;
+			height: .8rem;
+			border-radius: 50%;
+			left: -1.83rem;
+			top: .35rem;
+			background: linear-gradient(160deg, var(--accent), var(--accent-2));
+		}
+
+		.contact-card a {
+			text-decoration: none;
+		}
+
+		footer {
+			border-top: 1px solid rgba(255, 255, 255, .12);
+			background: rgba(8, 12, 24, .85);
+		}
+	</style>
+</head>
+<body>
+	<nav class="navbar navbar-expand-lg sticky-top">
+		<div class="container py-2">
+			<a class="navbar-brand fw-bold" href="#home">Nova Blake</a>
+			<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu" aria-controls="navMenu" aria-expanded="false" aria-label="Toggle navigation">
+				<span class="navbar-toggler-icon"></span>
+			</button>
+			<div class="collapse navbar-collapse" id="navMenu">
+				<ul class="navbar-nav ms-auto gap-lg-2">
+					<li class="nav-item"><a class="nav-link" href="#projects">Projects</a></li>
+					<li class="nav-item"><a class="nav-link" href="#skills">Skills</a></li>
+					<li class="nav-item"><a class="nav-link" href="#journey">Journey</a></li>
+					<li class="nav-item"><a class="nav-link" href="#contact">Contact</a></li>
+				</ul>
+			</div>
+		</div>
+	</nav>
+
+	<header class="hero" id="home">
+		<div class="container py-5 position-relative">
+			<div class="row align-items-center g-4">
+				<div class="col-lg-7">
+					<span class="chip mb-3 d-inline-block">Available for freelance & full-time</span>
+					<h1 class="display-4 fw-bold mb-3">I craft <span class="highlight">immersive digital experiences</span> that feel alive.</h1>
+					<p class="lead text-secondary-emphasis mb-4">Front-end developer and UI engineer focused on fast, accessible interfaces with refined detail and strong visual identity.</p>
+					<div class="d-flex flex-wrap gap-2 mb-4">
+						<a href="#projects" class="btn btn-primary btn-lg px-4"><i class="bi bi-grid-1x2-fill me-2"></i>View Work</a>
+						<a href="#contact" class="btn btn-outline-light btn-lg px-4"><i class="bi bi-send me-2"></i>Let’s Talk</a>
+					</div>
+					<div class="d-flex flex-wrap gap-2">
+						<span class="chip"><i class="bi bi-lightning-charge-fill me-1"></i>Performance-first</span>
+						<span class="chip"><i class="bi bi-universal-access-circle me-1"></i>Accessibility-minded</span>
+						<span class="chip"><i class="bi bi-phone-fill me-1"></i>Responsive by default</span>
+					</div>
+				</div>
+				<div class="col-lg-5">
+					<div class="glass-card p-4 p-md-5">
+						<div class="row text-center g-3">
+							<div class="col-4">
+								<p class="metric-number mb-1">30+</p>
+								<small class="text-secondary">Projects</small>
+							</div>
+							<div class="col-4">
+								<p class="metric-number mb-1">5</p>
+								<small class="text-secondary">Years Exp</small>
+							</div>
+							<div class="col-4">
+								<p class="metric-number mb-1">99%</p>
+								<small class="text-secondary">Delivery</small>
+							</div>
+						</div>
+						<hr class="my-4 border-secondary-subtle">
+						<div class="d-grid gap-2">
+							<a href="#" class="btn btn-outline-info"><i class="bi bi-file-earmark-text me-2"></i>Download Resume</a>
+							<a href="#" class="btn btn-outline-light"><i class="bi bi-github me-2"></i>GitHub Profile</a>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</header>
+
+	<main>
+		<section id="projects" class="py-5">
+			<div class="container py-4">
+				<div class="d-flex justify-content-between align-items-end mb-4 flex-wrap gap-2">
+					<div>
+						<h2 class="section-title mb-2">Featured Projects</h2>
+						<p class="text-secondary mb-0">Selected work blending clean architecture and strong visual execution.</p>
+					</div>
+					<a href="#" class="btn btn-sm btn-outline-light">See all projects</a>
+				</div>
+				<div class="row g-4">
+					<div class="col-md-6 col-lg-4">
+						<div class="card project-card h-100 border-0 glass-card">
+							<img src="https://images.unsplash.com/photo-1559028012-481c04fa702d?auto=format&fit=crop&w=1200&q=80" class="card-img-top" alt="Project dashboard preview">
+							<div class="card-body">
+								<h5 class="card-title">Pulse Analytics</h5>
+								<p class="card-text text-secondary">Real-time SaaS dashboard with interactive charts, auth flow, and modular component architecture.</p>
+								<span class="badge text-bg-primary-subtle">React</span>
+								<span class="badge text-bg-info-subtle">Bootstrap</span>
+							</div>
+						</div>
+					</div>
+					<div class="col-md-6 col-lg-4">
+						<div class="card project-card h-100 border-0 glass-card">
+							<img src="https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1200&q=80" class="card-img-top" alt="AI project preview">
+							<div class="card-body">
+								<h5 class="card-title">Echo AI Studio</h5>
+								<p class="card-text text-secondary">Prompt workspace with file-aware context, advanced editor controls, and collaborative review tools.</p>
+								<span class="badge text-bg-primary-subtle">TypeScript</span>
+								<span class="badge text-bg-info-subtle">Node.js</span>
+							</div>
+						</div>
+					</div>
+					<div class="col-md-6 col-lg-4">
+						<div class="card project-card h-100 border-0 glass-card">
+							<img src="https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&w=1200&q=80" class="card-img-top" alt="Mobile web app preview">
+							<div class="card-body">
+								<h5 class="card-title">Motion Commerce</h5>
+								<p class="card-text text-secondary">Conversion-focused storefront with motion cues, performance budgets, and reusable UI primitives.</p>
+								<span class="badge text-bg-primary-subtle">Next.js</span>
+								<span class="badge text-bg-info-subtle">Stripe</span>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<section id="skills" class="py-5">
+			<div class="container py-4">
+				<div class="row g-4 align-items-stretch">
+					<div class="col-lg-7">
+						<div class="glass-card p-4 h-100">
+							<h3 class="section-title mb-3">Skills & Toolkit</h3>
+							<p class="text-secondary mb-3">A practical blend of product thinking, UI craft, and engineering discipline.</p>
+							<div>
+								<span class="skill-pill">HTML5</span>
+								<span class="skill-pill">CSS3 / Sass</span>
+								<span class="skill-pill">Bootstrap 5</span>
+								<span class="skill-pill">JavaScript / TypeScript</span>
+								<span class="skill-pill">React</span>
+								<span class="skill-pill">Next.js</span>
+								<span class="skill-pill">Node.js</span>
+								<span class="skill-pill">REST APIs</span>
+								<span class="skill-pill">Figma</span>
+								<span class="skill-pill">Git & CI/CD</span>
+							</div>
+						</div>
+					</div>
+					<div class="col-lg-5">
+						<div class="glass-card p-4 h-100">
+							<h3 class="section-title mb-3">Client Feedback</h3>
+							<blockquote class="blockquote mb-2">
+								<p class="fs-6">“Fast execution, sharp design intuition, and clean code handoff. Exactly what modern teams need.”</p>
+							</blockquote>
+							<figcaption class="blockquote-footer mb-0 text-secondary">Product Lead at Arc Digital</figcaption>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<section id="journey" class="py-5">
+			<div class="container py-4">
+				<h2 class="section-title mb-4">Journey</h2>
+				<div class="glass-card p-4">
+					<div class="timeline">
+						<div class="timeline-item">
+							<h6 class="mb-1">Senior Front-End Engineer • DarkEcho Studio</h6>
+							<small class="text-secondary d-block mb-2">2023 — Present</small>
+							<p class="text-secondary mb-0">Led UI architecture across multiple products and improved Lighthouse scores above 90 across key pages.</p>
+						</div>
+						<div class="timeline-item">
+							<h6 class="mb-1">UI Developer • Neon Pixel Labs</h6>
+							<small class="text-secondary d-block mb-2">2021 — 2023</small>
+							<p class="text-secondary mb-0">Built scalable design systems with Bootstrap and React for B2B and commerce platforms.</p>
+						</div>
+						<div class="timeline-item mb-0">
+							<h6 class="mb-1">Freelance Web Designer & Developer</h6>
+							<small class="text-secondary d-block mb-2">2019 — 2021</small>
+							<p class="text-secondary mb-0">Delivered high-converting websites for startups, creators, and local businesses.</p>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<section id="contact" class="py-5">
+			<div class="container py-4">
+				<div class="glass-card p-4 p-md-5 contact-card">
+					<div class="row align-items-center g-4">
+						<div class="col-lg-8">
+							<h2 class="section-title mb-2">Let’s build something exceptional.</h2>
+							<p class="text-secondary mb-0">Open to product collaborations, full-time roles, and ambitious freelance projects.</p>
+						</div>
+						<div class="col-lg-4 text-lg-end">
+							<a href="mailto:hello@novablake.dev" class="btn btn-primary me-2"><i class="bi bi-envelope-fill me-2"></i>Email Me</a>
+							<a href="#" class="btn btn-outline-light"><i class="bi bi-linkedin me-2"></i>LinkedIn</a>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+	</main>
+
+	<footer class="py-4">
+		<div class="container d-flex flex-wrap gap-2 justify-content-between align-items-center">
+			<small class="text-secondary">© 2026 Nova Blake. Crafted with Bootstrap 5.</small>
+			<div class="d-flex gap-3">
+				<a class="text-secondary" href="#"><i class="bi bi-github"></i></a>
+				<a class="text-secondary" href="#"><i class="bi bi-dribbble"></i></a>
+				<a class="text-secondary" href="#"><i class="bi bi-twitter-x"></i></a>
+			</div>
+		</div>
+	</footer>
+
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+</body>
+</html>
