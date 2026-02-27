@@ -36,7 +36,7 @@ export function renderProjectCard(project) {
 						 </div>
 						 <div class="d-flex gap-2 mt-auto">
 							${statsLink
-								? `<a href="${statsLink}" class="btn btn-outline-info btn-sm" target="_blank" rel="noopener noreferrer">View Stats</a>`
+								? `<a href="${statsLink}" class="btn btn-outline-info btn-sm">View Stats</a>`
 								: `<button class="btn btn-outline-secondary btn-sm" type="button" disabled>Stats Unavailable</button>`}
 							<a href="${link}" class="btn btn-outline-light btn-sm" target="_blank" rel="noopener noreferrer">View Project</a>
 						 </div>`}
@@ -84,7 +84,7 @@ export function renderProjectRow(project) {
 						 </div>
 						 <div class="d-flex gap-2 flex-wrap">
 							${statsLink
-								? `<a href="${statsLink}" class="btn btn-outline-info" target="_blank" rel="noopener noreferrer">View Stats</a>`
+								? `<a href="${statsLink}" class="btn btn-outline-info">View Stats</a>`
 								: `<button class="btn btn-outline-secondary" type="button" disabled>Stats Unavailable</button>`}
 							<a href="${link}" class="btn btn-outline-light" target="_blank" rel="noopener noreferrer">Open Project</a>
 						 </div>`}
