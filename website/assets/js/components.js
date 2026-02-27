@@ -12,8 +12,8 @@ export function renderProjectCard(project) {
 	const title = escapeHtml(project.title || "Untitled Project");
 	const description = formatDescription(
 		isComingSoon
-			? (project.description || "This project is currently in development. Check back soon for updates.")
-			: (project.description || "No description available.")
+			? (project.description || "Still in progress — updates coming soon.")
+			: (project.description || "No description added yet.")
 	);
 	const link = escapeHtml(project.link || "#");
 
@@ -26,7 +26,7 @@ export function renderProjectCard(project) {
 					<p class="card-text text-secondary project-description mb-3">${description}</p>
 					${isComingSoon
 						? `<div class="d-flex flex-wrap gap-2 mt-auto mb-3"><span class="badge text-bg-warning"><i class="bi bi-hourglass-split me-1"></i>Coming Soon</span></div>
-						   <button class="btn btn-outline-secondary btn-sm" type="button" disabled>Not Yet Available</button>`
+						   <button class="btn btn-outline-secondary btn-sm" type="button" disabled>In Development</button>`
 						: `<div class="d-flex flex-wrap gap-2 mt-auto mb-3 stats-badges">
 							<span class="badge text-bg-primary-subtle"><i class="bi bi-stars me-1"></i><span class="smooth-count" data-target="${cheerCount}">0</span> Cheers</span>
 							<span class="badge text-bg-info-subtle"><i class="bi bi-heart-fill me-1"></i><span class="smooth-count" data-target="${favoriteCount}">0</span> Favorites</span>
@@ -52,8 +52,8 @@ export function renderProjectRow(project) {
 	const title = escapeHtml(project.title || "Untitled Project");
 	const description = formatDescription(
 		isComingSoon
-			? (project.description || "This project is currently in development. Check back soon for updates.")
-			: (project.description || "No description available.")
+			? (project.description || "Still in progress — updates coming soon.")
+			: (project.description || "No description added yet.")
 	);
 	const link = escapeHtml(project.link || "#");
 
@@ -68,7 +68,7 @@ export function renderProjectRow(project) {
 					<p class="text-secondary project-description-full mb-3">${description}</p>
 					${isComingSoon
 						? `<div class="d-flex flex-wrap gap-2 mb-3"><span class="badge text-bg-warning"><i class="bi bi-hourglass-split me-1"></i>Coming Soon</span></div>
-						   <button class="btn btn-outline-secondary" type="button" disabled>Not Yet Available</button>`
+						   <button class="btn btn-outline-secondary" type="button" disabled>In Development</button>`
 						: `<div class="d-flex flex-wrap gap-2 mb-3 stats-badges">
 							<span class="badge text-bg-primary-subtle"><i class="bi bi-stars me-1"></i><span class="smooth-count" data-target="${cheerCount}">0</span> Cheers</span>
 							<span class="badge text-bg-info-subtle"><i class="bi bi-heart-fill me-1"></i><span class="smooth-count" data-target="${favoriteCount}">0</span> Favorites</span>
