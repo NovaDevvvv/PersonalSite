@@ -1,5 +1,5 @@
 import { renderProjectCard } from "./components.js";
-import { loadProjectsData } from "./projects-data.js";
+import { loadProjectsBundle } from "./projects-data.js";
 import { animateNumber } from "./utils.js";
 
 const projectsGrid = document.getElementById("projectsGrid");
@@ -31,11 +31,11 @@ function buildSignature(projects) {
 	return JSON.stringify(projects);
 }
 
-function renderProjects(projects) {
+function renderProjects(projects, totalTokensEarned = 0) {
 	if (!projects.length) {
 		projectsGrid.innerHTML = '<div class="col-12"><div class="alert alert-secondary mb-0">No projects found in projects.json.</div></div>';
 		animateMetric(projectsCount, 0, 700);
-		animateMetric(totalEarned, 0, 800);
+		animateMetric(totalEarned, Number(totalTokensEarned || 0), 800);
 		animateMetric(totalVisits, 0, 800);
 		animateMetric(totalFavorites, 0, 800);
 		animateMetric(totalCheers, 0, 800);
@@ -53,21 +53,19 @@ function renderProjects(projects) {
 		}
 
 		const stats = project.stats || {};
-		acc.tokenEarned += Number(stats.tokenEarned || 0);
 		acc.visitCount += Number(stats.visitCount || 0);
 		acc.favoriteCount += Number(stats.favoriteCount || 0);
 		acc.cheerCount += Number(stats.cheerCount || 0);
 		acc.visitorCount += Number(stats.visitorCount || 0);
 		return acc;
 	}, {
-		tokenEarned: 0,
 		visitCount: 0,
 		favoriteCount: 0,
 		cheerCount: 0,
 		visitorCount: 0,
 	});
 
-	animateMetric(totalEarned, totals.tokenEarned, 1000);
+	animateMetric(totalEarned, Number(totalTokensEarned || 0), 1000);
 	animateMetric(totalVisits, totals.visitCount, 1000);
 	animateMetric(totalFavorites, totals.favoriteCount, 1000);
 	animateMetric(totalCheers, totals.cheerCount, 1000);
@@ -76,12 +74,12 @@ function renderProjects(projects) {
 
 async function refreshProjects() {
 	try {
-		const projects = await loadProjectsData();
-		const signature = buildSignature(projects);
+		const { projects, totalTokensEarned } = await loadProjectsBundle();
+		const signature = buildSignature({ projects, totalTokensEarned });
 
 		if (signature !== lastSignature) {
 			lastSignature = signature;
-			renderProjects(projects);
+			renderProjects(projects, totalTokensEarned);
 		}
 	} catch (error) {
 		projectsGrid.innerHTML = '<div class="col-12"><div class="alert alert-danger mb-0">Could not load projects data.</div></div>';

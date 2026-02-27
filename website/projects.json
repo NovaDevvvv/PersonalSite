@@ -1,4 +1,5 @@
 {
+    "totalTokensEarned": 4154266,
     "DBS-Breakthrough": {
         "title": "DBS-Breakthrough",
         "description": "< SHATTER THE LIMIT >\\n\\nFight it out as your favorite characters in ^DBS-Breakthrough, a DB Super themed fighting game with an expansive roster of Characters, built with care around, and for, immersive and highly explosive battles entirely available in VR! ",
@@ -7,10 +8,10 @@
         "imageName": "6qvk1h5ikurn8pbam0ouyfqv1.jpg",
         "imageUrl": "https://img.rec.net/6qvk1h5ikurn8pbam0ouyfqv1.jpg",
         "stats": {
-            "cheerCount": 5292,
-            "favoriteCount": 4481,
-            "visitCount": 143864,
-            "visitorCount": 61611,
+            "cheerCount": 5294,
+            "favoriteCount": 4483,
+            "visitCount": 143890,
+            "visitorCount": 61623,
             "tokenEarned": 3902375
         },
         "comingSoon": false,
