@@ -11,6 +11,7 @@ const totalCheers = document.getElementById("totalCheers");
 const totalVisitors = document.getElementById("totalVisitors");
 
 let lastSignature = "";
+let refreshInFlight = false;
 
 function animateMetric(element, value, duration = 900) {
 	if (!element) {
@@ -75,6 +76,12 @@ function renderProjects(projects) {
 }
 
 async function refreshProjects() {
+	if (refreshInFlight) {
+		return;
+	}
+
+	refreshInFlight = true;
+
 	try {
 		const { projects } = await loadProjectsBundle();
 		const signature = buildSignature(projects);
@@ -84,10 +91,16 @@ async function refreshProjects() {
 			renderProjects(projects);
 		}
 	} catch (error) {
+		if (error?.name === "AbortError") {
+			return;
+		}
+
 		projectsGrid.innerHTML = '<div class="col-12"><div class="alert alert-danger mb-0">Could not load projects data.</div></div>';
 		console.error(error);
+	} finally {
+		refreshInFlight = false;
 	}
 }
 
 refreshProjects();
-setInterval(refreshProjects, 3000);
+setInterval(refreshProjects, 30000);
