@@ -5,17 +5,17 @@ export async function loadProjectsBundle() {
 	}
 
 	const raw = await response.json();
+	console.log("[projects-data] fetched projects.json", raw);
 
 	if (Array.isArray(raw)) {
-		return { projects: raw, totalTokensEarned: 0 };
+		return { projects: raw };
 	}
 
-	const totalTokensEarned = Number(raw.totalTokensEarned || 0);
 	const projects = Object.entries(raw)
-		.filter(([key, value]) => key !== "totalTokensEarned" && value && typeof value === "object")
+		.filter(([, value]) => value && typeof value === "object" && "id" in value)
 		.map(([, value]) => value);
 
-	return { projects, totalTokensEarned };
+	return { projects };
 }
 
 export async function loadProjectsData() {

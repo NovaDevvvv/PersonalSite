@@ -197,23 +197,13 @@ def update_projects() -> dict:
         except RuntimeError as error:
             print(f"Skipped {key}: {error}")
 
-    total_tokens_earned = sum(
-        int((project.get("stats") or {}).get("tokenEarned") or 0)
-        for project in projects.values()
-        if project.get("comingSoon") is not True and int(project.get("id") or -1) != -1
-    )
-
-    output = {"totalTokensEarned": total_tokens_earned}
-    output.update(projects)
-
-    PROJECTS_FILE.write_text(json.dumps(output, indent=4), encoding="utf-8")
-    return output
+    PROJECTS_FILE.write_text(json.dumps(projects, indent=4), encoding="utf-8")
+    return projects
 
 
 def main() -> int:
     updated_projects = update_projects()
-    project_count = len([value for value in updated_projects.values() if isinstance(value, dict)])
-    print(f"Updated {project_count} project entries in {PROJECTS_FILE.name}")
+    print(f"Updated {len(updated_projects)} project entries in {PROJECTS_FILE.name}")
     return 0
 
 
