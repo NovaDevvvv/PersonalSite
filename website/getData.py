@@ -213,8 +213,8 @@ def write_project_stats_pages(projects: dict) -> None:
         </div>
     </nav>
 
-    <main class=\"py-5\">
-        <section class=\"container py-4\">
+    <main class="py-3">
+        <div class="container py-2">
             <div class=\"glass-card\">
                 <h1 class="fw-bold mb-2">{safe_title}</h1>
                 <p class="text-secondary mb-4">{safe_description}</p>
@@ -232,7 +232,7 @@ def write_project_stats_pages(projects: dict) -> None:
                     <canvas id="visitsChart" height="120"></canvas>
                 </div>
             </div>
-        </section>
+        </div>
     </main>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
     <script>
