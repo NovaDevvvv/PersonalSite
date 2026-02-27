@@ -16,6 +16,7 @@ export function renderProjectCard(project) {
 			: (project.description || "No description added yet.")
 	);
 	const link = escapeHtml(project.link || "#");
+	const statsLink = `/project/${encodeURIComponent(String(project.id || ""))}/stats`;
 
 	return `
 		<div class="col-md-6 col-lg-4">
@@ -33,7 +34,10 @@ export function renderProjectCard(project) {
 							<span class="badge text-bg-success-subtle"><i class="bi bi-activity me-1"></i><span class="smooth-count" data-target="${visitCount}">0</span> Visits</span>
 							<span class="badge text-bg-secondary"><i class="bi bi-people-fill me-1"></i><span class="smooth-count" data-target="${visitorCount}">0</span> Players</span>
 						 </div>
-						 <a href="${link}" class="btn btn-outline-light btn-sm" target="_blank" rel="noopener noreferrer">View Project</a>`}
+						 <div class="d-flex gap-2 mt-auto">
+							<a href="${statsLink}" class="btn btn-outline-info btn-sm" target="_blank" rel="noopener noreferrer">View Stats</a>
+							<a href="${link}" class="btn btn-outline-light btn-sm" target="_blank" rel="noopener noreferrer">View Project</a>
+						 </div>`}
 				</div>
 			</div>
 		</div>
@@ -56,6 +60,7 @@ export function renderProjectRow(project) {
 			: (project.description || "No description added yet.")
 	);
 	const link = escapeHtml(project.link || "#");
+	const statsLink = `/project/${encodeURIComponent(String(project.id || ""))}/stats`;
 
 	return `
 		<article class="glass-card p-4 ${isComingSoon ? "coming-soon-card" : ""}">
@@ -75,7 +80,10 @@ export function renderProjectRow(project) {
 							<span class="badge text-bg-success-subtle"><i class="bi bi-activity me-1"></i><span class="smooth-count" data-target="${visitCount}">0</span> Visits</span>
 							<span class="badge text-bg-secondary"><i class="bi bi-people-fill me-1"></i><span class="smooth-count" data-target="${visitorCount}">0</span> Players</span>
 						 </div>
-						 <a href="${link}" class="btn btn-outline-light" target="_blank" rel="noopener noreferrer">Open Project</a>`}
+						 <div class="d-flex gap-2 flex-wrap">
+							<a href="${statsLink}" class="btn btn-outline-info" target="_blank" rel="noopener noreferrer">View Stats</a>
+							<a href="${link}" class="btn btn-outline-light" target="_blank" rel="noopener noreferrer">Open Project</a>
+						 </div>`}
 				</div>
 			</div>
 		</article>

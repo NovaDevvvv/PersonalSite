@@ -8,6 +8,7 @@ API_KEY_ENV = "RECROOMPRIMARYKEY"
 PROJECTS_FILE = Path(__file__).with_name("projects.json")
 IMAGE_BASE_URL = "https://img.rec.net/"
 COMING_SOON_IMAGE = "comingSoon.jpg"
+PROJECT_ROUTES_DIR = Path(__file__).with_name("project")
 
 
 def get_data(room_id: int) -> dict:
@@ -117,6 +118,67 @@ def enrich_project(project: dict) -> dict:
     return project
 
 
+def write_project_stats_pages(projects: dict) -> None:
+    PROJECT_ROUTES_DIR.mkdir(parents=True, exist_ok=True)
+
+    for project in projects.values():
+        room_id = project.get("id")
+        if room_id is None or int(room_id) == -1:
+            continue
+
+        stats = project.get("stats") or {}
+        title = project.get("title") or "Project"
+        description = project.get("description") or ""
+
+        route_dir = PROJECT_ROUTES_DIR / str(room_id) / "stats"
+        route_dir.mkdir(parents=True, exist_ok=True)
+
+        html = f"""<!doctype html>
+<html lang=\"en\" data-bs-theme=\"dark\">
+<head>
+    <meta charset=\"utf-8\">
+    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">
+    <title>Nova • {title} Stats</title>
+    <link rel=\"icon\" type=\"image/svg+xml\" href=\"../../../assets/favicon.svg\">
+    <link rel=\"preconnect\" href=\"https://fonts.googleapis.com\">
+    <link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin>
+    <link href=\"https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap\" rel=\"stylesheet\">
+    <link href=\"https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css\" rel=\"stylesheet\" integrity=\"sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH\" crossorigin=\"anonymous\">
+    <link href=\"https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css\" rel=\"stylesheet\">
+    <link href=\"../../../assets/css/site.css\" rel=\"stylesheet\">
+</head>
+<body>
+    <nav class=\"navbar navbar-expand-lg sticky-top\">
+        <div class=\"container py-2\">
+            <a class=\"navbar-brand fw-bold\" href=\"/home/\">Nova</a>
+            <div class=\"ms-auto d-flex gap-2\">
+                <a href=\"/projects.html\" class=\"btn btn-outline-light btn-sm\"><i class=\"bi bi-grid-1x2 me-2\"></i>All Projects</a>
+                <a href=\"/home/\" class=\"btn btn-outline-light btn-sm\"><i class=\"bi bi-arrow-left me-2\"></i>Home</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class=\"py-5\">
+        <section class=\"container py-4\">
+            <div class=\"glass-card\">
+                <h1 class=\"fw-bold mb-2\">{title}</h1>
+                <p class=\"text-secondary mb-4\">{description}</p>
+                <div class=\"row g-3\">
+                    <div class=\"col-12 col-md-3\"><div class=\"totals-item\"><p class=\"totals-number mb-1\">{int(stats.get('visitCount', 0)):,}</p><small class=\"text-secondary\">Visits</small></div></div>
+                    <div class=\"col-12 col-md-3\"><div class=\"totals-item\"><p class=\"totals-number mb-1\">{int(stats.get('visitorCount', 0)):,}</p><small class=\"text-secondary\">Unique Players</small></div></div>
+                    <div class=\"col-12 col-md-3\"><div class=\"totals-item\"><p class=\"totals-number mb-1\">{int(stats.get('favoriteCount', 0)):,}</p><small class=\"text-secondary\">Favorites</small></div></div>
+                    <div class=\"col-12 col-md-3\"><div class=\"totals-item\"><p class=\"totals-number mb-1\">{int(stats.get('cheerCount', 0)):,}</p><small class=\"text-secondary\">Cheers</small></div></div>
+                </div>
+            </div>
+        </section>
+    </main>
+</body>
+</html>
+"""
+
+        (route_dir / "index.html").write_text(html, encoding="utf-8")
+
+
 def update_projects() -> dict:
     raw = json.loads(PROJECTS_FILE.read_text(encoding="utf-8"))
     projects = {
@@ -132,6 +194,7 @@ def update_projects() -> dict:
             print(f"Skipped {key}: {error}")
 
     PROJECTS_FILE.write_text(json.dumps(projects, indent=4), encoding="utf-8")
+    write_project_stats_pages(projects)
     return projects
 
 
