@@ -91,6 +91,12 @@ def extract_room_token_candidates(project_key: str, project: dict) -> list[str]:
     if explicit_token:
         candidates.append(explicit_token)
 
+    room_id = project.get("id")
+    if room_id is not None:
+        room_id_token = str(room_id).strip()
+        if room_id_token and room_id_token != "-1":
+            candidates.append(room_id_token)
+
     title_token = (project.get("title") or "").strip()
     if title_token:
         candidates.append(title_token)
