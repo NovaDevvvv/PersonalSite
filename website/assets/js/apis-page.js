@@ -20,7 +20,8 @@ async function loadApis() {
 
 		apiGrid.innerHTML = apis.map(renderApiCard).join("");
 	} catch (error) {
-		apiGrid.innerHTML = '<div class="col-12"><div class="alert alert-danger mb-0">Could not load API data.</div></div>';
+		const message = String(error?.message || "Unknown error");
+		apiGrid.innerHTML = `<div class="col-12"><div class="alert alert-danger mb-0">Could not load API data. ${message}</div></div>`;
 		console.error(error);
 	}
 }

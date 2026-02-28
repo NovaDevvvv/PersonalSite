@@ -46,12 +46,28 @@ function normalizeApiMap(rawMap) {
 }
 
 export async function loadApisData() {
-	const response = await fetch(`/api.json?t=${Date.now()}`, { cache: "no-store" });
-	if (!response.ok) {
-		throw new Error(`Failed to load api.json (${response.status})`);
+	const candidates = ["api.json", "/api.json", "../api.json"];
+	let raw = null;
+	let lastError = null;
+
+	for (const candidate of candidates) {
+		try {
+			const response = await fetch(`${candidate}?t=${Date.now()}`, { cache: "no-store" });
+			if (!response.ok) {
+				lastError = new Error(`Failed to load ${candidate} (${response.status})`);
+				continue;
+			}
+
+			raw = await response.json();
+			break;
+		} catch (error) {
+			lastError = error;
+		}
 	}
 
-	const raw = await response.json();
+	if (raw === null) {
+		throw lastError || new Error("Failed to load api.json");
+	}
 
 	if (Array.isArray(raw)) {
 		return raw;

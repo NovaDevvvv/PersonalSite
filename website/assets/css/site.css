@@ -13,6 +13,10 @@ body {
 		radial-gradient(circle at 10% 10%, var(--bg-radial-1) 0, transparent 35%),
 		radial-gradient(circle at 90% 20%, var(--bg-radial-2) 0, transparent 40%),
 		#0c1222;
+	background-repeat: no-repeat;
+	background-size: 160% 160%, 160% 160%, auto;
+	background-attachment: fixed;
+	min-height: 100vh;
 	color: #e9edf5;
 }
 
