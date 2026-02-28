@@ -3,6 +3,18 @@ import { escapeHtml } from "./utils.js";
 
 const apiGrid = document.getElementById("apiGrid");
 
+function renderJsonBlock(value) {
+	if (value === null || value === undefined) {
+		return "";
+	}
+
+	return `<pre class="api-code-block mb-0">${escapeHtml(JSON.stringify(value, null, 2))}</pre>`;
+}
+
+function hasObjectContent(value) {
+	return value && typeof value === "object" && Object.keys(value).length > 0;
+}
+
 function renderApiCard(api) {
 	const title = escapeHtml(api.name || "Untitled API");
 	const summary = escapeHtml(api.description || "No description provided.");
@@ -14,12 +26,34 @@ function renderApiCard(api) {
 			const method = escapeHtml((endpoint.method || "GET").toUpperCase());
 			const route = escapeHtml(endpoint.path || "/");
 			const details = escapeHtml(endpoint.description || "");
+			const parameters = endpoint.parameters || {};
+			const responseExample = endpoint.responseExample;
+			const parametersHtml = hasObjectContent(parameters)
+				? renderJsonBlock(parameters)
+				: '<small class="text-secondary">No parameters.</small>';
+			const responseHtml = responseExample !== null && responseExample !== undefined
+				? renderJsonBlock(responseExample)
+				: '<small class="text-secondary">No example response.</small>';
 
 			return `
 				<li class="api-endpoint-item">
-					<span class="api-method">${method}</span>
-					<code class="api-route">${route}</code>
-					${details ? `<small class="text-secondary d-block mt-1">${details}</small>` : ""}
+					<details class="api-endpoint-details">
+						<summary class="api-endpoint-summary">
+							<span class="api-method">${method}</span>
+							<code class="api-route">${route}</code>
+						</summary>
+						${details ? `<small class="text-secondary d-block mt-2">${details}</small>` : ""}
+						<div class="api-endpoint-extra mt-3 d-grid gap-3">
+							<div>
+								<p class="api-sub-label mb-2">Parameters</p>
+								${parametersHtml}
+							</div>
+							<div>
+								<p class="api-sub-label mb-2">Example Response</p>
+								${responseHtml}
+							</div>
+						</div>
+					</details>
 				</li>
 			`;
 		}).join("")
