@@ -1,0 +1,93 @@
+{
+    "Recconnect": {
+        "description": "A tool to connect Rec Room to a server and fetch room data.",
+        "url": "https://github.com/novadevvvv/RecConnect",
+        "endpoints": {
+            "https://api.novaa.dev/v1/recconnect/search": {
+                "method": "GET",
+                "description": "Search for a Rec Room room by room name.",
+                "parameters": {
+                    "room_name": "The name of the room to search for."
+                },
+                "response": {
+                    "Results": [
+                        {
+                            "RoomId": 2124839549918473538,
+                            "Name": "RecConnectAPI",
+                            "Description": "The place to start for most creators.",
+                            "ImageName": "DefaultRoomImage.jpg",
+                            "CreatorAccountId": 8281893,
+                            "Stats": {
+                                "CheerCount": 0,
+                                "FavoriteCount": 0,
+                                "VisitorCount": 2,
+                                "VisitCount": 6
+                            }
+                        }
+                    ],
+                    "TotalResults": 1
+                }
+            },
+            "https://api.novaa.dev/v1/recconnect/modify": {
+                "method": "POST",
+                "description": "Modify a room description.",
+                "parameters": {
+                    "room_id": "The id of the room to modify.",
+                    "description": "The new description for the room."
+                },
+                "response": {
+                    "success": true,
+                    "raw": {
+                        "status": 200,
+                        "body": {
+                            "value": {
+                                "RoomId": 2124839549918473538,
+                                "Name": "RecConnectAPI",
+                                "Description": "Updated room description",
+                                "Stats": {
+                                    "CheerCount": 0,
+                                    "FavoriteCount": 0,
+                                    "VisitorCount": 2,
+                                    "VisitCount": 6
+                                }
+                            },
+                            "success": true,
+                            "error_id": null,
+                            "error": null
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "RecAuth": {
+        "description": "A tool to get your active session token.",
+        "url": "https://github.com/novadevvvv/RecRoomAuthorisation",
+        "endpoints": {
+            "https://api.novaa.dev/v1/recauth/": {
+                "method": "POST",
+                "description": "Get the active session token for the account.",
+                "parameters": {
+                    "RN_SESSION_TOKEN": "The active session token for the account.",
+                    "RN_ACCESS_TOKEN": "Optional backup token."
+                },
+                "response": {
+                    "ok": true,
+                    "source": "session_token",
+                    "access_token": "ACCESSTOKEN",
+                    "decoded_token": {
+                        "iss": "https://auth.rec.net",
+                        "client_id": "recnet",
+                        "sub": "8281893",
+                        "scope": [
+                            "openid",
+                            "rn",
+                            "offline_access"
+                        ]
+                    }
+                }
+            }
+        }
+    }
+}
+
