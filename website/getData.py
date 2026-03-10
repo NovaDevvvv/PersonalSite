@@ -39,6 +39,27 @@ def update_daily_visit_history(project: dict, visit_count: int) -> list[dict]:
     return normalized
 
 
+def update_daily_metric_history(project: dict, history_key: str, metric_key: str, metric_value: int) -> list[dict]:
+    today = datetime.now(timezone.utc).date().isoformat()
+    history = project.get(history_key)
+
+    if isinstance(history, list):
+        normalized = [
+            item
+            for item in history
+            if isinstance(item, dict) and "date" in item and metric_key in item
+        ]
+    else:
+        normalized = []
+
+    if normalized and normalized[-1].get("date") == today:
+        normalized[-1][metric_key] = int(metric_value)
+        return normalized
+
+    normalized.append({"date": today, metric_key: int(metric_value)})
+    return normalized
+
+
 def build_daily_visit_series(points: list[dict], fallback_value: int) -> tuple[list[str], list[int]]:
     parsed_points: list[tuple[datetime, int]] = []
     for item in points:
@@ -78,6 +99,33 @@ def build_daily_visit_series(points: list[dict], fallback_value: int) -> tuple[l
         cursor_day += timedelta(days=1)
 
     return labels, values
+
+
+def build_series_for_labels(labels: list[str], points: list[dict], metric_key: str, fallback_value: int) -> list[int]:
+    values_by_day: dict[str, int] = {}
+    for item in points:
+        if not isinstance(item, dict) or item.get("date") is None:
+            continue
+
+        date_value = str(item.get("date", "")).strip()
+        try:
+            point_date = datetime.fromisoformat(date_value).date().isoformat()
+        except ValueError:
+            continue
+
+        values_by_day[point_date] = int(item.get(metric_key, fallback_value))
+
+    if not labels:
+        return [int(fallback_value)]
+
+    series_values: list[int] = []
+    last_known_value = int(fallback_value)
+    for label in labels:
+        if label in values_by_day:
+            last_known_value = values_by_day[label]
+        series_values.append(last_known_value)
+
+    return series_values
 
 
 def get_data(room_id: int) -> dict:
@@ -163,6 +211,8 @@ def enrich_project(project: dict) -> dict:
         project["imageUrl"] = f"{IMAGE_BASE_URL}{image_name}" if image_name else COMING_SOON_IMAGE
         project.pop("statsPath", None)
         project.pop("visitHistory", None)
+        project.pop("favoriteHistory", None)
+        project.pop("cheerHistory", None)
         project["stats"] = {
             "cheerCount": 0,
             "favoriteCount": 0,
@@ -187,7 +237,15 @@ def enrich_project(project: dict) -> dict:
         "visitCount": stats.get("VisitCount", 0),
         "visitorCount": stats.get("VisitorCount", 0),
     }
-    project["visitHistory"] = update_daily_visit_history(project, int(project["stats"]["visitCount"]))
+    project["visitHistory"] = update_daily_metric_history(
+        project, "visitHistory", "visitCount", int(project["stats"]["visitCount"])
+    )
+    project["favoriteHistory"] = update_daily_metric_history(
+        project, "favoriteHistory", "favoriteCount", int(project["stats"]["favoriteCount"])
+    )
+    project["cheerHistory"] = update_daily_metric_history(
+        project, "cheerHistory", "cheerCount", int(project["stats"]["cheerCount"])
+    )
     return project
 
 
@@ -203,6 +261,8 @@ def write_project_stats_pages(projects: dict) -> None:
         title = project.get("title") or "Project"
         description = project.get("description") or ""
         visit_history = project.get("visitHistory") if isinstance(project.get("visitHistory"), list) else []
+        favorite_history = project.get("favoriteHistory") if isinstance(project.get("favoriteHistory"), list) else []
+        cheer_history = project.get("cheerHistory") if isinstance(project.get("cheerHistory"), list) else []
 
         points = [
             {
@@ -217,6 +277,22 @@ def write_project_stats_pages(projects: dict) -> None:
             points = [{"date": "Today", "visitCount": int(stats.get("visitCount", 0))}]
 
         labels, values = build_daily_visit_series(points, int(stats.get("visitCount", 0)))
+        favorite_values = build_series_for_labels(
+            labels,
+            favorite_history,
+            "favoriteCount",
+            int(stats.get("favoriteCount", 0)),
+        )
+        cheer_values = build_series_for_labels(
+            labels,
+            cheer_history,
+            "cheerCount",
+            int(stats.get("cheerCount", 0)),
+        )
+        growth_values = [
+            0 if index == 0 else max(0, values[index] - values[index - 1])
+            for index in range(len(values))
+        ]
         first_value = values[0] if values else 0
         last_value = values[-1] if values else 0
         total_growth = max(0, last_value - first_value)
@@ -268,6 +344,15 @@ def write_project_stats_pages(projects: dict) -> None:
                     <div class="col-12 col-md-6"><div class="totals-item"><p class="totals-number mb-1">{total_growth:,}</p><small class="text-secondary">Total Growth</small></div></div>
                     <div class="col-12 col-md-6"><div class="totals-item"><p class="totals-number mb-1">{average_growth:,}</p><small class="text-secondary">Avg Daily Growth</small></div></div>
                 </div>
+                <div class="mb-3 d-flex justify-content-end">
+                    <label for="metricSelector" class="visually-hidden">Chart metric</label>
+                    <select id="metricSelector" class="form-select form-select-sm" style="max-width: 220px; background: rgba(15, 23, 42, 0.75); border-color: rgba(34, 211, 238, 0.35); color: rgba(233, 237, 245, 0.95);">
+                        <option value="visits" selected>Visits</option>
+                        <option value="growth">Growth</option>
+                        <option value="favorites">Favorites</option>
+                        <option value="cheers">Cheers</option>
+                    </select>
+                </div>
                 <div style="position:relative;min-height:320px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.1);border-radius:.9rem;padding:.75rem;">
                     <canvas id="visitsChart" height="120"></canvas>
                 </div>
@@ -277,23 +362,41 @@ def write_project_stats_pages(projects: dict) -> None:
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
     <script>
         const labels = {json.dumps(labels)};
-        const data = {json.dumps(values)};
-        const minValue = Math.min(...data);
-        const maxValue = Math.max(...data);
-        const valueRange = Math.max(maxValue - minValue, 1);
-        const axisPadding = Math.max(Math.ceil(valueRange * 0.12), 1);
-        const yMin = Math.max(minValue - axisPadding, 0);
-        const yMax = maxValue + axisPadding;
+        const visitsData = {json.dumps(values)};
+        const favoritesData = {json.dumps(favorite_values)};
+        const cheersData = {json.dumps(cheer_values)};
+        const growthData = {json.dumps(growth_values)};
+
+        const metricConfig = {{
+            visits: {{ label: "Visits", color: "rgba(34, 211, 238, 0.95)", fill: "rgba(34, 211, 238, 0.18)", data: visitsData }},
+            growth: {{ label: "Growth", color: "rgba(45, 212, 191, 0.95)", fill: "rgba(45, 212, 191, 0.18)", data: growthData }},
+            favorites: {{ label: "Favorites", color: "rgba(250, 204, 21, 0.95)", fill: "rgba(250, 204, 21, 0.18)", data: favoritesData }},
+            cheers: {{ label: "Cheers", color: "rgba(248, 113, 113, 0.95)", fill: "rgba(248, 113, 113, 0.18)", data: cheersData }},
+        }};
+
+        const calcAxisBounds = (series) => {{
+            const minValue = Math.min(...series);
+            const maxValue = Math.max(...series);
+            const valueRange = Math.max(maxValue - minValue, 1);
+            const axisPadding = Math.max(Math.ceil(valueRange * 0.12), 1);
+            return {{
+                min: Math.max(minValue - axisPadding, 0),
+                max: maxValue + axisPadding,
+            }};
+        }};
+
+        const initialMetric = "visits";
+        const initialBounds = calcAxisBounds(metricConfig[initialMetric].data);
 
         new window.Chart(document.getElementById("visitsChart"), {{
             type: "line",
             data: {{
                 labels,
                 datasets: [{{
-                    label: "Visits",
-                    data,
-                    borderColor: "rgba(34, 211, 238, 0.95)",
-                    backgroundColor: "rgba(34, 211, 238, 0.18)",
+                    label: metricConfig[initialMetric].label,
+                    data: metricConfig[initialMetric].data,
+                    borderColor: metricConfig[initialMetric].color,
+                    backgroundColor: metricConfig[initialMetric].fill,
                     fill: true,
                     tension: 0.3,
                     pointRadius: 3,
@@ -311,13 +414,30 @@ def write_project_stats_pages(projects: dict) -> None:
                     }},
                     y: {{
                         beginAtZero: false,
-                        min: yMin,
-                        max: yMax,
+                        min: initialBounds.min,
+                        max: initialBounds.max,
                         ticks: {{ color: "rgba(233, 237, 245, 0.7)" }},
                         grid: {{ color: "rgba(255,255,255,0.08)" }},
                     }},
                 }},
             }},
+        }});
+
+        const chart = window.Chart.getChart("visitsChart");
+        const selector = document.getElementById("metricSelector");
+
+        selector.addEventListener("change", (event) => {{
+            const metric = event.target.value;
+            const selected = metricConfig[metric] || metricConfig.visits;
+            const bounds = calcAxisBounds(selected.data);
+
+            chart.data.datasets[0].label = selected.label;
+            chart.data.datasets[0].data = selected.data;
+            chart.data.datasets[0].borderColor = selected.color;
+            chart.data.datasets[0].backgroundColor = selected.fill;
+            chart.options.scales.y.min = bounds.min;
+            chart.options.scales.y.max = bounds.max;
+            chart.update();
         }});
     </script>
 </body>

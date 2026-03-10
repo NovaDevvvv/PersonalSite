@@ -38,6 +38,15 @@
                     <div class="col-12 col-md-6"><div class="totals-item"><p class="totals-number mb-1">14</p><small class="text-secondary">Total Growth</small></div></div>
                     <div class="col-12 col-md-6"><div class="totals-item"><p class="totals-number mb-1">7</p><small class="text-secondary">Avg Daily Growth</small></div></div>
                 </div>
+                <div class="mb-3 d-flex justify-content-end">
+                    <label for="metricSelector" class="visually-hidden">Chart metric</label>
+                    <select id="metricSelector" class="form-select form-select-sm" style="max-width: 220px; background: rgba(15, 23, 42, 0.75); border-color: rgba(34, 211, 238, 0.35); color: rgba(233, 237, 245, 0.95);">
+                        <option value="visits" selected>Visits</option>
+                        <option value="growth">Growth</option>
+                        <option value="favorites">Favorites</option>
+                        <option value="cheers">Cheers</option>
+                    </select>
+                </div>
                 <div style="position:relative;min-height:320px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.1);border-radius:.9rem;padding:.75rem;">
                     <canvas id="visitsChart" height="120"></canvas>
                 </div>
@@ -47,23 +56,41 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
     <script>
         const labels = ["2026-03-08", "2026-03-09", "2026-03-10"];
-        const data = [120162, 120171, 120176];
-        const minValue = Math.min(...data);
-        const maxValue = Math.max(...data);
-        const valueRange = Math.max(maxValue - minValue, 1);
-        const axisPadding = Math.max(Math.ceil(valueRange * 0.12), 1);
-        const yMin = Math.max(minValue - axisPadding, 0);
-        const yMax = maxValue + axisPadding;
+        const visitsData = [120162, 120171, 120176];
+        const favoritesData = [2823, 2823, 2823];
+        const cheersData = [2271, 2271, 2271];
+        const growthData = [0, 9, 5];
+
+        const metricConfig = {
+            visits: { label: "Visits", color: "rgba(34, 211, 238, 0.95)", fill: "rgba(34, 211, 238, 0.18)", data: visitsData },
+            growth: { label: "Growth", color: "rgba(45, 212, 191, 0.95)", fill: "rgba(45, 212, 191, 0.18)", data: growthData },
+            favorites: { label: "Favorites", color: "rgba(250, 204, 21, 0.95)", fill: "rgba(250, 204, 21, 0.18)", data: favoritesData },
+            cheers: { label: "Cheers", color: "rgba(248, 113, 113, 0.95)", fill: "rgba(248, 113, 113, 0.18)", data: cheersData },
+        };
+
+        const calcAxisBounds = (series) => {
+            const minValue = Math.min(...series);
+            const maxValue = Math.max(...series);
+            const valueRange = Math.max(maxValue - minValue, 1);
+            const axisPadding = Math.max(Math.ceil(valueRange * 0.12), 1);
+            return {
+                min: Math.max(minValue - axisPadding, 0),
+                max: maxValue + axisPadding,
+            };
+        };
+
+        const initialMetric = "visits";
+        const initialBounds = calcAxisBounds(metricConfig[initialMetric].data);
 
         new window.Chart(document.getElementById("visitsChart"), {
             type: "line",
             data: {
                 labels,
                 datasets: [{
-                    label: "Visits",
-                    data,
-                    borderColor: "rgba(34, 211, 238, 0.95)",
-                    backgroundColor: "rgba(34, 211, 238, 0.18)",
+                    label: metricConfig[initialMetric].label,
+                    data: metricConfig[initialMetric].data,
+                    borderColor: metricConfig[initialMetric].color,
+                    backgroundColor: metricConfig[initialMetric].fill,
                     fill: true,
                     tension: 0.3,
                     pointRadius: 3,
@@ -81,13 +108,30 @@
                     },
                     y: {
                         beginAtZero: false,
-                        min: yMin,
-                        max: yMax,
+                        min: initialBounds.min,
+                        max: initialBounds.max,
                         ticks: { color: "rgba(233, 237, 245, 0.7)" },
                         grid: { color: "rgba(255,255,255,0.08)" },
                     },
                 },
             },
+        });
+
+        const chart = window.Chart.getChart("visitsChart");
+        const selector = document.getElementById("metricSelector");
+
+        selector.addEventListener("change", (event) => {
+            const metric = event.target.value;
+            const selected = metricConfig[metric] || metricConfig.visits;
+            const bounds = calcAxisBounds(selected.data);
+
+            chart.data.datasets[0].label = selected.label;
+            chart.data.datasets[0].data = selected.data;
+            chart.data.datasets[0].borderColor = selected.color;
+            chart.data.datasets[0].backgroundColor = selected.fill;
+            chart.options.scales.y.min = bounds.min;
+            chart.options.scales.y.max = bounds.max;
+            chart.update();
         });
     </script>
 </body>
