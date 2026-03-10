@@ -278,6 +278,12 @@ def write_project_stats_pages(projects: dict) -> None:
     <script>
         const labels = {json.dumps(labels)};
         const data = {json.dumps(values)};
+        const minValue = Math.min(...data);
+        const maxValue = Math.max(...data);
+        const valueRange = Math.max(maxValue - minValue, 1);
+        const axisPadding = Math.max(Math.ceil(valueRange * 0.12), 1);
+        const yMin = Math.max(minValue - axisPadding, 0);
+        const yMax = maxValue + axisPadding;
 
         new window.Chart(document.getElementById("visitsChart"), {{
             type: "line",
@@ -304,7 +310,9 @@ def write_project_stats_pages(projects: dict) -> None:
                         grid: {{ color: "rgba(255,255,255,0.08)" }},
                     }},
                     y: {{
-                        beginAtZero: true,
+                        beginAtZero: false,
+                        min: yMin,
+                        max: yMax,
                         ticks: {{ color: "rgba(233, 237, 245, 0.7)" }},
                         grid: {{ color: "rgba(255,255,255,0.08)" }},
                     }},
