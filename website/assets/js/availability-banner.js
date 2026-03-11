@@ -1,6 +1,7 @@
 (function () {
 	const TIME_ZONE = "Australia/Adelaide";
 	const BANNER_ID = "availabilityBanner";
+	const STORAGE_KEY = "availabilityBannerDisabled";
 	const CHECK_INTERVAL_MS = 60_000;
 	const BANNER_HTML =
 		"I'm unavailable right now (Adelaide time). " +
@@ -43,8 +44,20 @@
 		return minutes >= 6 * 60 && minutes < 22 * 60;
 	}
 
+	function isBannerDisabled() {
+		return window.localStorage.getItem(STORAGE_KEY) === "1";
+	}
+
+	function setBannerDisabled(disabled) {
+		if (disabled) {
+			window.localStorage.setItem(STORAGE_KEY, "1");
+		} else {
+			window.localStorage.removeItem(STORAGE_KEY);
+		}
+	}
+
 	function upsertBanner() {
-		const shouldShowBanner = !isAvailableNow();
+		const shouldShowBanner = !isAvailableNow() && !isBannerDisabled();
 		let banner = document.getElementById(BANNER_ID);
 
 		if (!shouldShowBanner) {
@@ -72,6 +85,19 @@
 		if (!document.body) {
 			return;
 		}
+
+		window.availabilityBannerControls = {
+			isDisabled: isBannerDisabled,
+			setDisabled: (disabled) => {
+				setBannerDisabled(Boolean(disabled));
+				upsertBanner();
+			},
+			toggle: () => {
+				setBannerDisabled(!isBannerDisabled());
+				upsertBanner();
+				return isBannerDisabled();
+			},
+		};
 
 		upsertBanner();
 		window.setInterval(upsertBanner, CHECK_INTERVAL_MS);
