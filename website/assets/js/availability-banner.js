@@ -3,6 +3,8 @@
 	const BANNER_ID = "availabilityBanner";
 	const STORAGE_KEY = "availabilityBannerOverride";
 	const CHECK_INTERVAL_MS = 60_000;
+	let isInitialized = false;
+	let intervalId = null;
 	const BANNER_HTML =
 		"I'm unavailable right now (Adelaide time). " +
 		"<span class=\"availability-banner-time\">Available Mon-Fri 6:00 AM-10:00 PM, Sat-Sun 12:00 PM-12:00 AM.</span>";
@@ -91,9 +93,11 @@
 	}
 
 	function initializeAvailabilityBanner() {
-		if (!document.body) {
+		if (!document.body || isInitialized) {
 			return;
 		}
+
+		isInitialized = true;
 
 		window.availabilityBannerControls = {
 			isVisible: isBannerVisible,
@@ -114,10 +118,12 @@
 		};
 
 		upsertBanner();
-		window.setInterval(upsertBanner, CHECK_INTERVAL_MS);
+		intervalId = window.setInterval(upsertBanner, CHECK_INTERVAL_MS);
 	}
 
-	if (document.readyState === "loading") {
+	if (document.body) {
+		initializeAvailabilityBanner();
+	} else if (document.readyState === "loading") {
 		document.addEventListener("DOMContentLoaded", initializeAvailabilityBanner);
 	} else {
 		initializeAvailabilityBanner();
