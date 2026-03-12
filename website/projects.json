@@ -7,10 +7,10 @@
         "imageName": "9ugm0ekz42et013al6pblmbuj.jpg",
         "imageUrl": "https://img.rec.net/9ugm0ekz42et013al6pblmbuj.jpg",
         "stats": {
-            "cheerCount": 7215,
-            "favoriteCount": 5985,
-            "visitCount": 197009,
-            "visitorCount": 87154
+            "cheerCount": 7218,
+            "favoriteCount": 5989,
+            "visitCount": 197109,
+            "visitorCount": 87173
         },
         "comingSoon": false,
         "statsPath": "/project/8947998229867728285/stats",
@@ -25,7 +25,7 @@
             },
             {
                 "date": "2026-03-12",
-                "visitCount": 197009
+                "visitCount": 197109
             }
         ],
         "favoriteHistory": [
@@ -39,7 +39,7 @@
             },
             {
                 "date": "2026-03-12",
-                "favoriteCount": 5985
+                "favoriteCount": 5989
             }
         ],
         "cheerHistory": [
@@ -53,7 +53,7 @@
             },
             {
                 "date": "2026-03-12",
-                "cheerCount": 7215
+                "cheerCount": 7218
             }
         ]
     },
