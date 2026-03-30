@@ -7,10 +7,10 @@
         "imageName": "ew4vzkiyt1kw77t15oa1bkiu5.jpg",
         "imageUrl": "https://img.rec.net/ew4vzkiyt1kw77t15oa1bkiu5.jpg",
         "stats": {
-            "cheerCount": 9075,
-            "favoriteCount": 7351,
-            "visitCount": 261515,
-            "visitorCount": 112378
+            "cheerCount": 9078,
+            "favoriteCount": 7354,
+            "visitCount": 261586,
+            "visitorCount": 112394
         },
         "comingSoon": false,
         "statsPath": "/project/8947998229867728285/stats",
@@ -94,6 +94,10 @@
             {
                 "date": "2026-03-29",
                 "visitCount": 261515
+            },
+            {
+                "date": "2026-03-30",
+                "visitCount": 261586
             }
         ],
         "favoriteHistory": [
@@ -176,6 +180,10 @@
             {
                 "date": "2026-03-29",
                 "favoriteCount": 7351
+            },
+            {
+                "date": "2026-03-30",
+                "favoriteCount": 7354
             }
         ],
         "cheerHistory": [
@@ -258,6 +266,10 @@
             {
                 "date": "2026-03-29",
                 "cheerCount": 9075
+            },
+            {
+                "date": "2026-03-30",
+                "cheerCount": 9078
             }
         ]
     },
@@ -356,6 +368,10 @@
             {
                 "date": "2026-03-29",
                 "visitCount": 120514
+            },
+            {
+                "date": "2026-03-30",
+                "visitCount": 120514
             }
         ],
         "favoriteHistory": [
@@ -438,6 +454,10 @@
             {
                 "date": "2026-03-29",
                 "favoriteCount": 2825
+            },
+            {
+                "date": "2026-03-30",
+                "favoriteCount": 2825
             }
         ],
         "cheerHistory": [
@@ -519,6 +539,10 @@
             },
             {
                 "date": "2026-03-29",
+                "cheerCount": 2274
+            },
+            {
+                "date": "2026-03-30",
                 "cheerCount": 2274
             }
         ]
