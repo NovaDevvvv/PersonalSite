@@ -7,10 +7,10 @@
         "imageName": "ew4vzkiyt1kw77t15oa1bkiu5.jpg",
         "imageUrl": "https://img.rec.net/ew4vzkiyt1kw77t15oa1bkiu5.jpg",
         "stats": {
-            "cheerCount": 9188,
-            "favoriteCount": 7426,
-            "visitCount": 266064,
-            "visitorCount": 113780
+            "cheerCount": 9192,
+            "favoriteCount": 7428,
+            "visitCount": 266196,
+            "visitorCount": 113811
         },
         "comingSoon": false,
         "statsPath": "/project/8947998229867728285/stats",
@@ -101,7 +101,7 @@
             },
             {
                 "date": "2026-03-31",
-                "visitCount": 266064
+                "visitCount": 266196
             }
         ],
         "favoriteHistory": [
@@ -191,7 +191,7 @@
             },
             {
                 "date": "2026-03-31",
-                "favoriteCount": 7426
+                "favoriteCount": 7428
             }
         ],
         "cheerHistory": [
@@ -281,7 +281,7 @@
             },
             {
                 "date": "2026-03-31",
-                "cheerCount": 9188
+                "cheerCount": 9192
             }
         ]
     },
