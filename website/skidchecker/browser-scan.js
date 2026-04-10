@@ -219,7 +219,8 @@ export async function analyzeJarInBrowser(file, onProgress) {
     if (content) {
       extractedFiles.push({
         relativePath: entry.name,
-        content
+        content,
+        kind: isTextEntry(entry.name) ? 'text' : 'binary-strings'
       });
     }
 
@@ -247,10 +248,14 @@ export async function analyzeJarInBrowser(file, onProgress) {
   markStep(steps, 'score', 'done', `Verdict: ${result.verdict}.`);
   onProgress?.({ progress: 100, currentStep: 'Analysis complete', steps });
 
+  const deobfuscatedArchive = await buildDeobfuscatedArchive(file.name, extractedFiles, result.detections);
+
   return {
     fileName: file.name,
     sourceFileCount: extractedFiles.length,
     mode: 'browser',
+    deobfuscatedArchiveBlob: deobfuscatedArchive.blob,
+    deobfuscatedArchiveName: deobfuscatedArchive.fileName,
     ...result
   };
 }
@@ -333,6 +338,9 @@ function scanExtractedContent(files) {
 
   for (const signature of signatures) {
     const match = files.find((file) => signature.test(file.content));
+    const location = match ? locateMatch(match.content, signature.id) : null;
+    const deobfuscatedSource = match ? deobfuscateSource(match.content) : null;
+    const webhooks = deobfuscatedSource ? extractDiscordWebhooks(deobfuscatedSource) : [];
 
     checks.push({
       id: signature.id,
@@ -359,7 +367,14 @@ function scanExtractedContent(files) {
       rationale: signature.rationale,
       description: signature.description,
       file: match.relativePath,
-      snippet: buildSnippet(match.content, signature.id)
+      snippet: buildSnippet(match.content, signature.id, location),
+      fullSource: match.content,
+      deobfuscatedSource,
+      webhooks,
+      matchIndex: location?.index ?? 0,
+      matchLength: location?.length ?? 0,
+      lineNumber: getLineNumber(match.content, location?.index ?? 0),
+      columnNumber: getColumnNumber(match.content, location?.index ?? 0)
     });
   }
 
@@ -383,24 +398,9 @@ function scanExtractedContent(files) {
   };
 }
 
-function buildSnippet(content, signatureId) {
-  if (signatureId === 'weedhack-payload') {
-    const position = content.indexOf('minecraftInfo');
-    if (position >= 0) {
-      return crop(content, position, 260);
-    }
-  }
-
-  if (signatureId === 'minecraft-session-token-access') {
-    const position = content.indexOf('method_1674');
-    if (position >= 0) {
-      return crop(content, position, 260);
-    }
-  }
-
-  const marker = /method_1674|accessToken|launcher_profiles\.json|accounts\.json|webhooks|Runtime\.getRuntime\(\)\.exec|powershell/i.exec(content);
-  if (marker?.index != null) {
-    return crop(content, marker.index, 260);
+function buildSnippet(content, signatureId, location = locateMatch(content, signatureId)) {
+  if (location) {
+    return crop(content, location.index, 260);
   }
 
   return crop(content, 0, 260);
@@ -410,4 +410,164 @@ function crop(content, centerIndex, width) {
   const start = Math.max(0, centerIndex - Math.floor(width / 2));
   const end = Math.min(content.length, centerIndex + Math.floor(width / 2));
   return content.slice(start, end).replace(/\s+/g, ' ').trim();
+}
+
+function locateMatch(content, signatureId) {
+  const exactMarker = findExactMarker(content, signatureId);
+  if (exactMarker) {
+    return exactMarker;
+  }
+
+  const matcher = getSignaturePattern(signatureId);
+  if (!matcher) {
+    return null;
+  }
+
+  const match = matcher.exec(content);
+  if (!match || match.index == null) {
+    return null;
+  }
+
+  return {
+    index: match.index,
+    length: Math.max(match[0]?.length ?? 0, 1)
+  };
+}
+
+function findExactMarker(content, signatureId) {
+  const markers = {
+    'weedhack-payload': 'minecraftInfo',
+    'minecraft-session-token-access': 'method_1674'
+  };
+
+  const marker = markers[signatureId];
+  if (!marker) {
+    return null;
+  }
+
+  const index = content.indexOf(marker);
+  if (index < 0) {
+    return null;
+  }
+
+  return {
+    index,
+    length: marker.length
+  };
+}
+
+function getSignaturePattern(signatureId) {
+  const patterns = {
+    'minecraft-token-collection': /accessToken|uuid|username/i,
+    'session-object-access': /(getSession\s*\(|session\s*[=.]|class_320|accessToken|token|uuid|username|method_1674)/i,
+    'launcher-account-file-access': /launcher_profiles\.json|accounts\.json|minecraftcredentials|Tlauncher|feather|lunarclient/i,
+    'discord-webhook': /discord(?:app)?\.com\/api\/webhooks|discord\.com\/api\/webhooks/i,
+    'token-post-body': /\{\\?"(?:username|uuid|accessToken|token)\\?":|accessToken.{0,120}(?:HttpURLConnection|URL|POST|webhook)/is,
+    'browser-cookie-targeting': /Cookies|Local Storage|Login Data|Network\\Cookies|Google\\Chrome|Opera Stable|Mozilla\\Firefox/i,
+    'powershell-launch': /powershell(?:\.exe)?/i,
+    'secondary-payload-retrieval': /HttpURLConnection|java\.net\.URL|OkHttpClient|HttpClient|\.dll|\.exe|\.bat|\.ps1|AppData|Temp/i,
+    'external-process-invocation': /Runtime\.getRuntime\(\)\.exec|ProcessBuilder\s*\(/,
+    'obfuscated-string-decoding': /Base64\.getDecoder\(|decodeBase64|DatatypeConverter\.parseBase64Binary|HttpURLConnection|java\.net\.URL|Runtime\.getRuntime\(\)\.exec|ProcessBuilder\s*\(/i,
+    'system-identifier-collection': /PROCESSOR_IDENTIFIER|COMPUTERNAME|wmic csproduct get uuid|MachineGuid|user\.name|os\.name/i,
+    'generic-network-communication': /HttpURLConnection|java\.net\.URL|OkHttpClient|HttpClient/
+  };
+
+  return patterns[signatureId] ?? null;
+}
+
+function getLineNumber(content, index) {
+  if (!content) {
+    return 1;
+  }
+
+  const boundedIndex = Math.max(0, Math.min(index, content.length));
+  return content.slice(0, boundedIndex).split('\n').length;
+}
+
+function getColumnNumber(content, index) {
+  if (!content) {
+    return 1;
+  }
+
+  const boundedIndex = Math.max(0, Math.min(index, content.length));
+  const lineStart = content.lastIndexOf('\n', boundedIndex - 1);
+  return boundedIndex - lineStart;
+}
+
+function deobfuscateSource(content) {
+  let output = content;
+  let previous = '';
+
+  while (output !== previous) {
+    previous = output;
+    output = output.replace(/"((?:[^"\\]|\\.)*)"\s*\+\s*"((?:[^"\\]|\\.)*)"/g, '"$1$2"');
+  }
+
+  return output
+    .replace(/\\u([0-9a-fA-F]{4})/g, (_, hex) => String.fromCharCode(Number.parseInt(hex, 16)))
+    .replace(/\\x([0-9a-fA-F]{2})/g, (_, hex) => String.fromCharCode(Number.parseInt(hex, 16)))
+    .replace(/\\\//g, '/')
+    .replace(/\\"/g, '"');
+}
+
+function extractDiscordWebhooks(content) {
+  const matches = content.match(/https?:\/\/(?:canary\.|ptb\.)?discord(?:app)?\.com\/api\/webhooks\/\d+\/[A-Za-z0-9._-]+/gi) || [];
+  return [...new Set(matches)];
+}
+
+async function buildDeobfuscatedArchive(originalFileName, files, detections) {
+  const archive = new JSZip();
+  const webhookEntries = [];
+
+  for (const file of files) {
+    const deobfuscatedContent = deobfuscateSource(file.content);
+    const exportPath = buildDeobfuscatedExportPath(file.relativePath, file.kind);
+    archive.file(exportPath, deobfuscatedContent);
+
+    const fileWebhooks = extractDiscordWebhooks(deobfuscatedContent);
+    for (const webhook of fileWebhooks) {
+      webhookEntries.push(`${file.relativePath}: ${webhook}`);
+    }
+  }
+
+  const report = {
+    generatedFrom: originalFileName,
+    generatedAt: new Date().toISOString(),
+    note: 'This browser-mode deobfuscated export contains readable extracted content for analysis. It is not a rebuilt runnable mod jar.',
+    sourceFileCount: files.length,
+    detections: detections.map((detection) => ({
+      id: detection.id,
+      label: detection.label,
+      file: detection.file,
+      lineNumber: detection.lineNumber,
+      columnNumber: detection.columnNumber,
+      webhooks: detection.webhooks || []
+    })),
+    webhooks: [...new Set(webhookEntries)]
+  };
+
+  archive.file('_skidchecker/report.json', JSON.stringify(report, null, 2));
+
+  if (report.webhooks.length) {
+    archive.file('_skidchecker/webhooks.txt', `${report.webhooks.join('\n')}\n`);
+  }
+
+  return {
+    blob: await archive.generateAsync({ type: 'blob' }),
+    fileName: `${sanitizeArchiveBaseName(originalFileName)}-deobfuscated.zip`
+  };
+}
+
+function buildDeobfuscatedExportPath(relativePath, kind) {
+  if (kind === 'binary-strings') {
+    return `${relativePath}.txt`;
+  }
+
+  return relativePath;
+}
+
+function sanitizeArchiveBaseName(fileName) {
+  return String(fileName || 'mod')
+    .replace(/\.jar$/i, '')
+    .replace(/[^a-zA-Z0-9._-]/g, '_');
 }

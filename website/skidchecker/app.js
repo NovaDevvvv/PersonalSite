@@ -24,6 +24,8 @@ const verdictValue = document.querySelector('#verdict-value');
 const familyValue = document.querySelector('#family-value');
 const filesValue = document.querySelector('#files-value');
 const checksValue = document.querySelector('#checks-value');
+const resultDownloadRegular = document.querySelector('#result-download-regular');
+const resultDownloadDeobfuscated = document.querySelector('#result-download-deobfuscated');
 
 const detectionsContainer = document.querySelector('#detections');
 const checksGrid = document.querySelector('#checks-grid');
@@ -33,19 +35,44 @@ const stepTemplate = document.querySelector('#step-template');
 const detectionTemplate = document.querySelector('#detection-template');
 const checkTemplate = document.querySelector('#check-template');
 const catalogTemplate = document.querySelector('#catalog-template');
+const sourceDialog = document.querySelector('#source-dialog');
+const sourceDialogTitle = document.querySelector('#source-dialog-title');
+const sourceDialogMeta = document.querySelector('#source-dialog-meta');
+const sourceDialogCode = document.querySelector('#source-dialog-code');
+const sourceDialogClose = document.querySelector('#source-dialog-close');
+const sourceDialogWebhooks = document.querySelector('#source-dialog-webhooks');
+const sourceDialogWebhookList = document.querySelector('#source-dialog-webhook-list');
 
 const runtimeConfig = window.SKIDCHECKER_CONFIG || {};
 const apiBaseUrl = normalizeApiBaseUrl(runtimeConfig.apiBaseUrl || '');
 
 let activeJobId = null;
 let pollTimer = null;
+let activeSourceDetection = null;
+let currentUploadedFile = null;
+let activeDownloadBundle = null;
 
 boot();
 bindEvents();
 
 function bindEvents() {
   input.addEventListener('change', () => {
-    selectedFile.textContent = input.files?.[0]?.name || 'No file selected';
+    currentUploadedFile = input.files?.[0] || null;
+    selectedFile.textContent = currentUploadedFile?.name || 'No file selected';
+    syncDownloadActions({ regularEnabled: false, deobfuscatedEnabled: false });
+  });
+
+  sourceDialogClose?.addEventListener('click', closeSourceViewer);
+  resultDownloadRegular?.addEventListener('click', () => downloadWholeMod('regular'));
+  resultDownloadDeobfuscated?.addEventListener('click', () => downloadWholeMod('deobfuscated'));
+  sourceDialog?.addEventListener('click', (event) => {
+    if (event.target === sourceDialog) {
+      closeSourceViewer();
+    }
+  });
+  sourceDialog?.addEventListener('cancel', (event) => {
+    event.preventDefault();
+    closeSourceViewer();
   });
 
   form.addEventListener('submit', async (event) => {
@@ -56,6 +83,9 @@ function bindEvents() {
     }
 
     clearPolling();
+    currentUploadedFile = input.files[0];
+    activeDownloadBundle = null;
+    syncDownloadActions({ regularEnabled: false, deobfuscatedEnabled: false });
 
     const formData = new FormData();
     formData.append('modJar', input.files[0]);
@@ -144,6 +174,12 @@ async function runBrowserModeAnalysis(file) {
       steps
     });
   });
+
+  activeDownloadBundle = {
+    originalFile: file,
+    deobfuscatedArchiveBlob: result.deobfuscatedArchiveBlob || null,
+    deobfuscatedArchiveName: result.deobfuscatedArchiveName || null
+  };
 
   renderJob({
     fileName: file.name,
@@ -259,6 +295,8 @@ function renderSteps(steps) {
 }
 
 function renderPendingResult(fileName, status, currentStep) {
+  closeSourceViewer();
+  syncDownloadActions({ regularEnabled: false, deobfuscatedEnabled: false });
   resultStatus.textContent = humanize(status);
   resultTitle.textContent = fileName || 'Awaiting result';
   resultSummary.textContent = currentStep || 'Analysis has started, but no verdict is available yet.';
@@ -275,6 +313,11 @@ function renderPendingResult(fileName, status, currentStep) {
 }
 
 function renderResult(result) {
+  closeSourceViewer();
+  syncDownloadActions({
+    regularEnabled: Boolean(currentUploadedFile),
+    deobfuscatedEnabled: Boolean(result?.deobfuscatedArchiveBlob || activeDownloadBundle?.deobfuscatedArchiveBlob)
+  });
   resultStatus.textContent = humanize(result.verdict);
   resultTitle.textContent = result.fileName;
   resultSummary.textContent = buildSummary(result);
@@ -310,8 +353,25 @@ function renderDetections(detections) {
     node.querySelector('.detection-title').textContent = detection.label;
     node.querySelector('.description').textContent = detection.description;
     node.querySelector('.rationale').textContent = detection.rationale;
-    node.querySelector('.file').textContent = detection.file;
+    node.querySelector('.file').textContent = formatSourceLocation(detection);
     node.querySelector('.snippet').textContent = detection.snippet;
+
+    const sourceButton = node.querySelector('.source-button');
+    if (detection.fullSource) {
+      sourceButton.addEventListener('click', () => openSourceViewer(detection));
+    } else {
+      sourceButton.remove();
+    }
+
+    const webhookPanel = node.querySelector('.webhook-panel');
+    const webhookList = node.querySelector('.webhook-list');
+    if (detection.webhooks?.length) {
+      renderWebhookList(webhookList, detection.webhooks);
+      webhookPanel.hidden = false;
+    } else {
+      webhookPanel.remove();
+    }
+
     detectionsContainer.append(node);
   }
 }
@@ -353,6 +413,8 @@ function renderChecks(checks) {
 }
 
 function showErrorState(fileName, message) {
+  closeSourceViewer();
+  syncDownloadActions({ regularEnabled: false, deobfuscatedEnabled: false });
   setProgressShell({
     label: 'Failed',
     progress: 100,
@@ -373,6 +435,163 @@ function showErrorState(fileName, message) {
   detectionsContainer.textContent = 'The analysis failed before detections could be generated.';
   checksGrid.className = 'checks-grid empty-state';
   checksGrid.textContent = 'No per-check matrix is available because the analysis did not complete.';
+}
+
+function formatSourceLocation(detection) {
+  if (!detection?.file) {
+    return 'Unknown source file';
+  }
+
+  if (typeof detection.lineNumber === 'number' && typeof detection.columnNumber === 'number') {
+    return `${detection.file} • line ${detection.lineNumber}, column ${detection.columnNumber}`;
+  }
+
+  return detection.file;
+}
+
+function openSourceViewer(detection) {
+  if (!sourceDialog || !detection?.fullSource) {
+    return;
+  }
+
+  activeSourceDetection = detection;
+  sourceDialogTitle.textContent = detection.file || 'Source file';
+  sourceDialogMeta.textContent = formatSourceLocation(detection);
+  renderSourceDialogWebhooks(detection.webhooks || []);
+  renderHighlightedSource(sourceDialogCode, detection.fullSource, detection.matchIndex, detection.matchLength);
+
+  if (!sourceDialog.open) {
+    sourceDialog.showModal();
+  }
+
+  requestAnimationFrame(() => {
+    const highlight = sourceDialogCode.querySelector('.source-highlight');
+    if (highlight) {
+      highlight.scrollIntoView({ block: 'center', inline: 'nearest' });
+    } else {
+      sourceDialogCode.scrollTop = 0;
+      sourceDialogCode.scrollLeft = 0;
+    }
+  });
+}
+
+function closeSourceViewer() {
+  activeSourceDetection = null;
+  if (sourceDialog?.open) {
+    sourceDialog.close();
+  }
+
+  if (sourceDialogCode) {
+    sourceDialogCode.replaceChildren();
+    sourceDialogCode.textContent = '';
+  }
+
+  if (sourceDialogWebhookList) {
+    sourceDialogWebhookList.replaceChildren();
+  }
+
+  if (sourceDialogWebhooks) {
+    sourceDialogWebhooks.hidden = true;
+  }
+}
+
+function renderHighlightedSource(container, source, matchIndex = 0, matchLength = 0) {
+  container.replaceChildren();
+  container.scrollTop = 0;
+  container.scrollLeft = 0;
+
+  const normalizedIndex = Number.isInteger(matchIndex) && matchIndex >= 0 ? matchIndex : 0;
+  const normalizedLength = Number.isInteger(matchLength) && matchLength > 0 ? matchLength : 0;
+
+  if (!normalizedLength) {
+    container.textContent = source;
+    return;
+  }
+
+  const start = Math.min(normalizedIndex, source.length);
+  const end = Math.min(start + normalizedLength, source.length);
+
+  container.append(document.createTextNode(source.slice(0, start)));
+
+  const highlight = document.createElement('mark');
+  highlight.className = 'source-highlight';
+  highlight.textContent = source.slice(start, end);
+  container.append(highlight);
+
+  container.append(document.createTextNode(source.slice(end)));
+}
+
+function renderSourceDialogWebhooks(webhooks) {
+  if (!sourceDialogWebhooks || !sourceDialogWebhookList) {
+    return;
+  }
+
+  sourceDialogWebhookList.replaceChildren();
+
+  if (!webhooks.length) {
+    sourceDialogWebhooks.hidden = true;
+    return;
+  }
+
+  renderWebhookList(sourceDialogWebhookList, webhooks);
+  sourceDialogWebhooks.hidden = false;
+}
+
+function renderWebhookList(container, webhooks) {
+  container.replaceChildren();
+
+  for (const webhook of webhooks) {
+    const item = document.createElement('li');
+    item.className = 'webhook-item';
+
+    const code = document.createElement('code');
+    code.textContent = webhook;
+    item.append(code);
+
+    container.append(item);
+  }
+}
+
+function downloadWholeMod(mode) {
+  if (mode === 'regular') {
+    if (!currentUploadedFile) {
+      return;
+    }
+
+    downloadBlob(currentUploadedFile, currentUploadedFile.name);
+    return;
+  }
+
+  const archiveBlob = activeDownloadBundle?.deobfuscatedArchiveBlob;
+  const archiveName = activeDownloadBundle?.deobfuscatedArchiveName;
+  if (!archiveBlob || !archiveName) {
+    return;
+  }
+
+  downloadBlob(archiveBlob, archiveName);
+}
+
+function downloadBlob(blob, fileName) {
+  const objectUrl = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+
+  link.href = objectUrl;
+  link.download = fileName;
+  document.body.append(link);
+  link.click();
+  link.remove();
+
+  window.setTimeout(() => URL.revokeObjectURL(objectUrl), 250);
+}
+
+function syncDownloadActions({ regularEnabled, deobfuscatedEnabled }) {
+  if (resultDownloadRegular) {
+    resultDownloadRegular.disabled = !regularEnabled;
+  }
+
+  if (resultDownloadDeobfuscated) {
+    resultDownloadDeobfuscated.disabled = !deobfuscatedEnabled;
+  }
 }
 
 function buildSummary(result) {

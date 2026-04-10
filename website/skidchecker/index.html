@@ -147,6 +147,10 @@
                 <strong id="checks-value">-</strong>
               </div>
             </div>
+            <div class="result-actions">
+              <button id="result-download-regular" class="download-regular-button" type="button" disabled>Download regular</button>
+              <button id="result-download-deobfuscated" class="download-deobfuscated-button" type="button" disabled>Download deobfuscated</button>
+            </div>
           </section>
 
           <section class="card detections-card">
@@ -242,6 +246,13 @@
         <p class="rationale"></p>
         <p class="file"></p>
         <pre class="snippet"></pre>
+        <div class="detection-actions">
+          <button class="source-button" type="button">View full file</button>
+        </div>
+        <section class="webhook-panel" hidden>
+          <p class="webhook-title">Discord webhooks found in deobfuscated source</p>
+          <ul class="webhook-list"></ul>
+        </section>
       </article>
     </template>
 
@@ -279,6 +290,26 @@
         <p class="catalog-rationale"></p>
       </article>
     </template>
+
+    <dialog id="source-dialog" class="source-dialog">
+      <div class="source-dialog-card">
+        <div class="source-dialog-topline">
+          <div>
+            <p class="eyebrow">Matched Source</p>
+            <h2 id="source-dialog-title">Source file</h2>
+            <p id="source-dialog-meta" class="hint">Detection source location</p>
+          </div>
+          <div class="source-dialog-actions">
+            <button id="source-dialog-close" class="source-dialog-close" type="button" aria-label="Close source viewer">Close</button>
+          </div>
+        </div>
+        <section id="source-dialog-webhooks" class="webhook-panel" hidden>
+          <p class="webhook-title">Discord webhooks found in deobfuscated source</p>
+          <ul id="source-dialog-webhook-list" class="webhook-list"></ul>
+        </section>
+        <pre id="source-dialog-code" class="source-dialog-code"></pre>
+      </div>
+    </dialog>
 
     <script src="./config.js"></script>
     <script type="module" src="./app.js"></script>
