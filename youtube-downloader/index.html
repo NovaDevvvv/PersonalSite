@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>:3</title>
+  <link rel="stylesheet" href="/components/styles/app.css">
+</head>
+<body>
+  <canvas id="spiral"></canvas>
+  <div class="video-info" id="videoInfo" hidden>
+    <div class="video-info__row"><span class="video-info__label">Title</span><span id="videoTitle"></span></div>
+    <div class="video-info__row"><span class="video-info__label">Length</span><span id="videoLength"></span></div>
+    <div class="video-info__row"><span class="video-info__label">By</span><span id="videoUploader"></span></div>
+  </div>
+  <form class="download-options" id="downloadOptions" hidden>
+    <div class="download-options__title">Download Options</div>
+    <label class="download-options__field">
+      <span class="download-options__label">Format</span>
+      <select id="formatSelect" name="format">
+        <option value="mp4">MP4</option>
+        <option value="mkv">MKV</option>
+        <option value="webm">WEBM</option>
+        <option value="mp3">MP3</option>
+        <option value="m4a">M4A</option>
+        <option value="wav">WAV</option>
+        <option value="flac">FLAC</option>
+      </select>
+    </label>
+    <label class="download-options__field">
+      <span class="download-options__label">Audio Codec</span>
+      <select id="audioCodecSelect" name="audioCodec">
+        <option value="aac">AAC</option>
+        <option value="flac">FLAC</option>
+        <option value="mp3">MP3</option>
+        <option value="opus">OPUS</option>
+        <option value="vorbis">VORBIS</option>
+      </select>
+    </label>
+    <label class="download-options__field">
+      <span class="download-options__label">Video Codec</span>
+      <select id="videoCodecSelect" name="videoCodec">
+        <option value="h264">H264</option>
+        <option value="hevc">HEVC</option>
+        <option value="av1">AV1</option>
+        <option value="vp9">VP9</option>
+      </select>
+    </label>
+    <label class="download-options__field">
+      <span class="download-options__label">Quality</span>
+      <select id="qualitySelect" name="quality">
+        <option value="source">Source</option>
+        <option value="2160p">2160P</option>
+        <option value="1440p">1440P</option>
+        <option value="1080p">1080P</option>
+        <option value="720p">720P</option>
+        <option value="480p">480P</option>
+        <option value="360p">360P</option>
+      </select>
+    </label>
+    <button class="download-options__button" type="submit">
+      <span class="download-options__button-main">Start Download</span>
+    </button>
+  </form>
+  <div class="loading" id="loadingText">[ VERIFYING YOU ARE A HUMAN ]</div>
+  <script type="module" src="/components/js/main.js"></script>
+</body>
+</html>
