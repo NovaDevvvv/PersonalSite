@@ -1,0 +1,9 @@
+{
+  "name": "downloader",
+  "main": "workers/downloader-worker.js",
+  "compatibility_date": "2026-04-16",
+  "workers_dev": true,
+  "observability": {
+    "enabled": true
+  }
+}

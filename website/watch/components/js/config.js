@@ -1,6 +1,7 @@
 export const VERIFYING_TEXT = "[ VERIFYING YOU ARE A HUMAN ]";
 export const VERIFYING_DURATION_MS = 1400;
 export const LOADING_FRAMES = ["[ LOADING. ]", "[ LOADING.. ]", "[ LOADING... ]"];
+export const BACKEND_BASE_URL = "https://downloader.novadevv12333.workers.dev";
 export const DOWNLOAD_START_TEXT = "[ DOWNLOADING 0% ]";
 export const METADATA_FAILED_TEXT = "[ METADATA FAILED ]";
 export const INVALID_URL_TEXT = "[ INVALID VIDEO URL ]";
