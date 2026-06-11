@@ -1,0 +1,108 @@
+# HTML & CSS Commissions
+
+## Services
+
+### ArtFight & Toyhouse Pages
+
+Custom profile pages designed specifically for ArtFight, Toyhouse, and similar platforms.
+
+**Includes:**
+- Custom HTML & CSS layout
+- Responsive design (where platform limitations allow)
+- Custom colours, themes, and styling
+- Character/profile-focused designs
+- Basic animations and effects
+- Source code included
+
+**Pricing:**  
+Starting from **$10 AUD**  
+*Final price depends on complexity and requested features.*
+
+---
+
+### Custom Websites
+
+Fully custom websites built from scratch to match your requirements.
+
+**Examples:**
+- Personal websites
+- Portfolios
+- Landing pages
+- Project websites
+- Small business websites
+- Community websites
+- Event pages
+
+**Includes:**
+- Custom HTML, CSS, and JavaScript
+- Responsive design for desktop and mobile
+- Modern UI/UX design
+- Source code included
+- Setup assistance if needed
+
+**Pricing:**  
+Starting from **$20 AUD**  
+*Final price depends on complexity, page count, and functionality.*
+
+<hr>
+
+## Hosting & Domains
+
+Want your website online? I can help with that too.
+
+### Domain Setup
+- Use your own domain and configure DNS yourself
+- Or I can purchase and configure a domain for you **(You must cover the cost of the domain)**
+
+### Hosting
+- 1 year of hosting available for an additional **$5 AUD**
+- HTTPS/SSL included where supported
+- Suitable for portfolios, landing pages, and other static websites
+
+---
+
+## Available Features
+
+Depending on the project, I can also provide:
+
+- Contact forms
+- Image galleries
+- Animations
+- Custom navigation bars
+- Dark/light themes
+- Social media integration
+- Interactive elements
+- Character showcases
+- Portfolio showcases
+- Project showcases
+
+---
+
+## Ordering
+
+Please provide:
+
+- A description of what you'd like created
+- Any references or examples
+- Preferred colours, theme, or aesthetic
+- Platform (Toyhouse, ArtFight, standalone website, etc.)
+- Any specific features you would like
+
+I'll provide a price before work begins.
+
+> Prices listed are starting prices and may vary depending on project scope and complexity.
+
+## Prior Work
+
+
+### My Hosting Service
+![alt text](commisionblog/SCALENODE_PREVIEW_1.png)
+
+### My Personal Site
+(it is purposefully kept simple)
+![alt text](commisionblog/personalsite.png)
+
+### Minecraft Server Site
+![alt text](commisionblog/spire.png)
+
+If you are interested contact me on Discord at @**NovaDevv**
